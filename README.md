@@ -14,17 +14,45 @@ Use it on-demand, or run it always-on. Either way, if your request is already cl
 
 ## Install
 
-### Claude Code — one line
+### One line — auto-detects your agents
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash
 ```
 
-Installs the skill and updates your `~/.claude/CLAUDE.md` automatically. Start a new Claude Code session and type `/distill` to confirm.
+Detects which agents are installed (Claude Code, Codex CLI, Gemini CLI, Antigravity) and installs for all of them automatically.
+
+### Install for a specific agent
+
+```bash
+# Claude Code only
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash -s -- --claude
+
+# Codex CLI only
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash -s -- --codex
+
+# Gemini CLI only
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash -s -- --gemini
+
+# Antigravity only
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash -s -- --antigravity
+
+# All agents regardless of detection
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash -s -- --all
+```
+
+### What each install does
+
+| Agent | Skill location | Trigger |
+|---|---|---|
+| Claude Code | `~/.claude/skills/distill/SKILL.md` + CLAUDE.md entry | `/distill` |
+| Codex CLI | appends to `~/.codex/AGENTS.md` | `distill this:` |
+| Gemini CLI | `~/.gemini/skills/distill/SKILL.md` | `distill this:` |
+| Antigravity | `~/.gemini/config/skills/distill/SKILL.md` | `/distill` |
 
 ### Always-on mode
 
-After installing, add this block to `~/.claude/CLAUDE.md`:
+After installing, add this block to `~/.claude/CLAUDE.md` (Claude Code) or the top of your agent's config file:
 
 ```markdown
 # distill (always-on)
@@ -33,8 +61,9 @@ Choose the appropriate mode (pass-through, light, structured, context-seeking, o
 Skip distill and proceed directly if the user prefixes their message with `--raw`.
 ```
 
-To turn off always-on: remove that block. The explicit `/distill` skill stays.  
-To skip on a single request: prefix with `--raw`.
+To turn off always-on: remove that block. The `/distill` skill stays available.
+
+To skip a single request: prefix with `--raw`.
 
 ```
 --raw just tell me what this function returns
@@ -45,13 +74,15 @@ To skip on a single request: prefix with `--raw`.
 <details>
 <summary>Expand for step-by-step</summary>
 
+**Claude Code**
+
 ```bash
 mkdir -p ~/.claude/skills/distill
 curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/distill.skill.md \
   -o ~/.claude/skills/distill/SKILL.md
 ```
 
-Then add to `~/.claude/CLAUDE.md`:
+Add to `~/.claude/CLAUDE.md`:
 
 ```markdown
 # distill
@@ -59,22 +90,31 @@ Then add to `~/.claude/CLAUDE.md`:
 When the user types `/distill`, invoke the Skill tool with `skill: "distill"` before doing anything else.
 ```
 
+**Codex CLI**
+
+Append the body of `distill.skill.md` (below the `---` frontmatter) to `~/.codex/AGENTS.md`. Prefix requests with `distill this:`.
+
+**Gemini CLI**
+
+```bash
+mkdir -p ~/.gemini/skills/distill
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/distill.skill.md \
+  -o ~/.gemini/skills/distill/SKILL.md
+```
+
+**Antigravity**
+
+```bash
+mkdir -p ~/.gemini/config/skills/distill
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/distill.skill.md \
+  -o ~/.gemini/config/skills/distill/SKILL.md
+```
+
+**Any other system**
+
+Paste the body of `distill.skill.md` into your system prompt or custom instructions. Prefix requests with `distill this:`.
+
 </details>
-
----
-
-### Other AI systems
-
-Distill is a plain Markdown file. Paste the body of `distill.skill.md` (below the `---` frontmatter) into any system that supports custom instructions.
-
-| System | Config file | Trigger |
-|---|---|---|
-| Codex CLI | `AGENTS.md` or `CODEX.md` | `distill this:` or `use distill:` |
-| Cursor | `.cursorrules` or Settings → Rules for AI | `distill this:` |
-| Gemini CLI | `GEMINI.md` | `distill this:` |
-| Any LLM | system prompt / custom instructions | `distill this:` |
-
-For always-on in any of these, add `"Apply Distill to every request. Skip if the user writes --raw."` to the top of the config file.
 
 ---
 
