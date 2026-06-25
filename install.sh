@@ -280,29 +280,29 @@ install_aider() {
 # ── Claude desktop app ────────────────────────────────────────────────────────
 install_claude_desktop() {
   echo "[claude-desktop]"
-  echo "  Claude desktop uses Cowork's account-scoped skill system."
-  echo "  Copying skill content to clipboard and opening the app..."
 
-  # Copy skill body (no frontmatter) to clipboard — macOS only
+  # Copy skill body (no frontmatter) to clipboard
   if command -v pbcopy >/dev/null 2>&1; then
     skill_body "$TMP_SKILL" | pbcopy
-    echo "  clipboard ← skill content copied"
+    echo "  clipboard ← distill skill content copied"
   else
-    echo "  (pbcopy not available — copy the skill body manually from distill.skill.md)"
+    echo "  pbcopy not available — paste the skill body manually from distill.skill.md"
   fi
 
-  # Open the Claude desktop app
-  if open -a "Claude" 2>/dev/null; then
-    echo "  opened Claude desktop app"
-  else
-    echo "  Could not open Claude automatically — open it manually"
-  fi
+  # Open Claude desktop app first so the notification lands on top of it
+  open -a "Claude" 2>/dev/null || true
 
-  echo ""
-  echo "  In Claude, start a new chat and run:"
-  echo "    skill-creator"
-  echo "  When prompted for content, paste with ⌘V."
-  echo "  Name it 'distill' and trigger with /distill."
+  # Show a macOS dialog so instructions are visible even after Claude takes focus
+  osascript -e '
+    tell application "System Events"
+      display dialog "Distill is in your clipboard.\n\n1. Start a new chat in Claude\n2. Type:  skill-creator\n3. Paste with ⌘V when asked for content\n4. Name it \"distill\"\n\nTrigger with /distill once created." ¬
+        buttons {"OK"} default button "OK" ¬
+        with title "Install Distill → Claude Desktop" ¬
+        with icon note
+    end tell
+  ' 2>/dev/null || echo "  (osascript unavailable — see instructions above)"
+
+  echo "  Trigger: /distill"
 }
 
 # ── Run ───────────────────────────────────────────────────────────────────────
