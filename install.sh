@@ -93,7 +93,7 @@ if [ "$AUTO" = true ]; then
   command -v amp      >/dev/null 2>&1 || [ -d "${HOME}/.amp" ]          && INSTALL_AMP=true
   command -v opencode >/dev/null 2>&1 || [ -d "${HOME}/.config/opencode" ] && INSTALL_OPENCODE=true
   command -v gemini   >/dev/null 2>&1 || [ -d "${HOME}/.gemini/skills" ] && INSTALL_GEMINI=true
-  [ -d "${HOME}/.gemini/antigravity" ] || [ -d "${HOME}/.gemini/config" ] && INSTALL_ANTIGRAVITY=true
+  [ -d "${HOME}/.gemini/antigravity" ] && INSTALL_ANTIGRAVITY=true
   [ -d "${HOME}/.continue" ]                                             && INSTALL_CONTINUE=true
   [ -d "${HOME}/.windsurf" ] || [ -d "${HOME}/.codeium/windsurf" ]      && INSTALL_WINDSURF=true
   command -v aider    >/dev/null 2>&1                                    && INSTALL_AIDER=true
@@ -115,11 +115,16 @@ fi
 # ── Fetch skill once ──────────────────────────────────────────────────────────
 TMP_SKILL=$(mktemp)
 trap 'rm -f "$TMP_SKILL"' EXIT
-curl -fsSL "${RAW_BASE}/${SKILL_FILE}" -o "$TMP_SKILL"
+if ! curl -fsSL "${RAW_BASE}/${SKILL_FILE}" -o "$TMP_SKILL"; then
+  echo "Error: failed to fetch ${RAW_BASE}/${SKILL_FILE}"
+  echo "Check your internet connection or try again."
+  exit 1
+fi
 
 # Strip YAML frontmatter (--- ... ---) — used for agents that take plain markdown
+# gsub handles Windows CRLF so the delimiter match works on any line ending
 skill_body() {
-  awk 'NR==1&&/^---$/{skip=1;next} skip&&/^---$/{skip=0;next} !skip' "$1"
+  awk 'NR==1&&/^---\r?$/{skip=1;next} skip&&/^---\r?$/{skip=0;next} !skip{gsub(/\r$/,""); print}' "$1"
 }
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

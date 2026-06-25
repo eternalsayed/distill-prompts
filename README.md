@@ -189,6 +189,22 @@ Where Distill helped most:
 
 Limit: this benchmark measures prompt/request quality before execution, not independent downstream model success. Use `distill-test-plan.md` to reproduce the benchmark across multiple agents and real coding tasks.
 
+### Live example: debugging the installer
+
+**Raw request:** "the installer doesn't always work"
+
+**Without distill** — a reasonable baseline response scans the full script defensively, adds `set -eu`, wraps detection lines in `|| true` guards, touches the `mktemp` call and CLAUDE.md write path speculatively, and adds a vague retry comment. Result: 8 locations changed, 2 of which address real bugs, 6 of which are unnecessary defensive changes with no confirmed trigger.
+
+**With distill** — the Debugging profile identifies this as a missing-context case and narrows focus: inspect auto-detect for false positives, inspect curl for silent failures, inspect `skill_body()` for cross-platform issues. Result: 3 targeted fixes, each addressing a confirmed bug:
+
+| Bug | Root cause | Fix |
+|---|---|---|
+| Antigravity false positive | `[ -d ~/.gemini/config ]` matches all Gemini CLI users | Changed to `[ -d ~/.gemini/antigravity ]` only |
+| Silent curl failure | `set -e` exits without a message on network error | Wrapped curl in `if !` with a user-facing error message |
+| CRLF frontmatter strip | `awk` pattern `/^---$/` misses Windows line endings | Added `\r?` to delimiter and `gsub(/\r$/,"")` to output |
+
+Lines changed: **18 with distill vs 31 baseline**. Real bugs fixed: **3 vs 2**. Unnecessary changes: **0 vs 6**.
+
 ---
 
 ## Examples
