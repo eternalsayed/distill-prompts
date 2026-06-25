@@ -19,6 +19,7 @@ GEMINI_SKILL_DIR="${HOME}/.gemini/skills/${SKILL_NAME}"
 ANTIGRAVITY_SKILL_DIR="${HOME}/.gemini/config/skills/${SKILL_NAME}"
 
 # Body-append / rules-based agents
+CODEX_SKILL_DIR="${HOME}/.codex/skills/${SKILL_NAME}"
 CODEX_AGENTS_MD="${HOME}/.codex/AGENTS.md"
 CONTINUE_RULES_DIR="${HOME}/.continue/rules"
 WINDSURF_RULES_DIR="${HOME}/.windsurf/rules"
@@ -164,9 +165,10 @@ When the user types \`/distill\`, invoke the Skill tool with \`skill: \"distill\
   echo "  Trigger: /distill"
 }
 
-# ── Codex CLI ─────────────────────────────────────────────────────────────────
+# ── Codex ─────────────────────────────────────────────────────────────────────
 install_codex() {
   echo "[codex]"
+  install_skill_md "$CODEX_SKILL_DIR"
   if [ ! -f "$CODEX_AGENTS_MD" ]; then
     mkdir -p "$(dirname "$CODEX_AGENTS_MD")"
     touch "$CODEX_AGENTS_MD"
@@ -175,10 +177,10 @@ install_codex() {
   if already_installed "$CODEX_AGENTS_MD" "## Distill"; then
     echo "  AGENTS.md already has Distill — skipping"
   else
-    { printf '\n## Distill\n\nWhen a request is prefixed with `distill this:` or `use distill:`, apply the Distill skill before answering.\n\n'; skill_body "$TMP_SKILL"; } >> "$CODEX_AGENTS_MD"
+    printf '\n## Distill\n\nWhen a request is prefixed with `distill this:` or `/distill`, apply the Distill skill before answering.\n' >> "$CODEX_AGENTS_MD"
     echo "  AGENTS.md → ${CODEX_AGENTS_MD}"
   fi
-  echo "  Trigger: distill this: <request>"
+  echo "  Trigger: /distill or distill this: <request>"
 }
 
 # ── Cline ─────────────────────────────────────────────────────────────────────

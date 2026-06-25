@@ -92,7 +92,7 @@ curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/i
 | Agent | Install location | Trigger |
 |---|---|---|
 | Claude Code | `~/.claude/skills/distill/SKILL.md` + CLAUDE.md entry | `/distill` |
-| Codex CLI | appended to `~/.codex/AGENTS.md` | `distill this:` |
+| Codex | `~/.codex/skills/distill/SKILL.md` + AGENTS.md entry | `/distill` |
 | Cline | `~/.cline/skills/distill/SKILL.md` | `/distill` |
 | KiloCode | `~/.kilo/skills/distill/SKILL.md` | `/distill` |
 | Amp | `~/.amp/skills/distill/SKILL.md` | `/distill` |
