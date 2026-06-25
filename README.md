@@ -12,9 +12,75 @@ Use it on-demand, or run it always-on. Either way, if your request is already cl
 
 ---
 
+## Install
+
+### Claude Code — one line
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/install.sh | bash
+```
+
+Installs the skill and updates your `~/.claude/CLAUDE.md` automatically. Start a new Claude Code session and type `/distill` to confirm.
+
+### Always-on mode
+
+After installing, add this block to `~/.claude/CLAUDE.md`:
+
+```markdown
+# distill (always-on)
+Before answering any request, silently apply Distill using the skill at `~/.claude/skills/distill/SKILL.md`.
+Choose the appropriate mode (pass-through, light, structured, context-seeking, or compression) based on the request.
+Skip distill and proceed directly if the user prefixes their message with `--raw`.
+```
+
+To turn off always-on: remove that block. The explicit `/distill` skill stays.  
+To skip on a single request: prefix with `--raw`.
+
+```
+--raw just tell me what this function returns
+```
+
+### Manual install
+
+<details>
+<summary>Expand for step-by-step</summary>
+
+```bash
+mkdir -p ~/.claude/skills/distill
+curl -fsSL https://raw.githubusercontent.com/eternalsayed/distill-prompts/main/distill.skill.md \
+  -o ~/.claude/skills/distill/SKILL.md
+```
+
+Then add to `~/.claude/CLAUDE.md`:
+
+```markdown
+# distill
+- **distill** (`~/.claude/skills/distill/SKILL.md`) — converts vague requests into clear AI-ready instructions. Trigger: `/distill`
+When the user types `/distill`, invoke the Skill tool with `skill: "distill"` before doing anything else.
+```
+
+</details>
+
+---
+
+### Other AI systems
+
+Distill is a plain Markdown file. Paste the body of `distill.skill.md` (below the `---` frontmatter) into any system that supports custom instructions.
+
+| System | Config file | Trigger |
+|---|---|---|
+| Codex CLI | `AGENTS.md` or `CODEX.md` | `distill this:` or `use distill:` |
+| Cursor | `.cursorrules` or Settings → Rules for AI | `distill this:` |
+| Gemini CLI | `GEMINI.md` | `distill this:` |
+| Any LLM | system prompt / custom instructions | `distill this:` |
+
+For always-on in any of these, add `"Apply Distill to every request. Skip if the user writes --raw."` to the top of the config file.
+
+---
+
 ## Why this is different
 
-Most "prompt optimizer" tools always do something — they rewrite every prompt, even clear ones. Distill has a genuine **pass-through mode**: when the request is already good, it proceeds without touching it.
+Most prompt optimizer tools always do something — they rewrite every prompt, even clear ones. Distill has a genuine **pass-through mode**: when the request is already good, it proceeds without touching it.
 
 Combined with **task-type profiles** (debugging vs refactoring vs architecture vs writing each get different treatment), this means always-on Distill doesn't add noise to requests that don't need it.
 
@@ -25,7 +91,7 @@ Combined with **task-type profiles** (debugging vs refactoring vs architecture v
 | Pass-through (no-op on clear requests) | ✅ Core feature | ❌ | ❌ | ❌ |
 | Task-type profiles | ✅ 7 profiles | ❌ | ❌ | Code only |
 | Compression mode for logs/output | ✅ | ❌ | ❌ | ❌ |
-| Per-request off switch | ✅ `--raw` | ❌ | ❌ | ❌ |
+| Per-request off switch (`--raw`) | ✅ | ❌ | ❌ | ❌ |
 | Dependencies | None | Hook + marketplace | Go binary + UI | Hook + marketplace |
 | Portability | Any LLM system | Claude Code only | Claude Code only | Claude Code + others |
 
@@ -33,109 +99,7 @@ Combined with **task-type profiles** (debugging vs refactoring vs architecture v
 
 ---
 
-## Modes
-
-### Explicit mode (default)
-
-You invoke `/distill` when you want it. Everything else is untouched.
-
-```
-/distill fix this bug
-/distill should we move to a monorepo?
-/distill <paste 200 lines of terminal output>
-```
-
-### Always-on mode
-
-Distill runs on every request. Clear requests pass through unchanged. Vague or complex ones get distilled first.
-
-**To skip on a single request:**
-
-```
---raw just tell me what this function returns
-```
-
-**To disable globally:** remove the always-on snippet from your config (see setup below).
-
----
-
-## Install
-
-### Claude Code — explicit mode
-
-```bash
-# Clone the repo
-git clone https://github.com/eternalsayed/distill-prompts.git
-
-# Create the skill directory
-mkdir -p ~/.claude/skills/distill
-
-# Copy the skill file
-cp distill-prompts/distill.skill.md ~/.claude/skills/distill/SKILL.md
-```
-
-Add this to `~/.claude/CLAUDE.md`:
-
-```markdown
-# distill
-- **distill** (`~/.claude/skills/distill/SKILL.md`) — converts vague requests into clear AI-ready instructions. Trigger: `/distill`
-When the user types `/distill`, invoke the Skill tool with `skill: "distill"` before doing anything else.
-```
-
-Restart Claude Code. Type `/distill` to confirm it appears in your skills.
-
-### Claude Code — always-on mode
-
-Complete the explicit mode setup first, then **also** add this to `~/.claude/CLAUDE.md`:
-
-```markdown
-# distill (always-on)
-Before answering any request, silently apply Distill using the skill at `~/.claude/skills/distill/SKILL.md`.
-Choose the appropriate mode (pass-through, light, structured, context-seeking, or compression) based on the request.
-Skip distill and proceed directly if the user prefixes their message with `--raw`.
-```
-
-To disable always-on: remove that block from your CLAUDE.md. The explicit `/distill` skill stays available.
-
----
-
-### Codex CLI
-
-Paste the body of `distill.skill.md` (the content below the `---` frontmatter) into your `AGENTS.md` or `CODEX.md`.
-
-- Explicit: prefix requests with `distill this:` or `use distill:`
-- Always-on: add `"Before answering any request, apply Distill. Skip if the user writes --raw."` to the top of the file.
-
----
-
-### Cursor
-
-Add the body of `distill.skill.md` to `.cursorrules` in your project root, or to **Settings → Rules for AI**.
-
-- Explicit: prefix requests with `distill this:`
-- Always-on: add the always-on instruction to the top of your rules file.
-
----
-
-### Gemini CLI
-
-Paste the body of `distill.skill.md` into `GEMINI.md` in your project root or `~/.gemini/GEMINI.md`.
-
-- Explicit: prefix with `distill this:`
-- Always-on: add the always-on instruction to the top of `GEMINI.md`.
-
----
-
-### Any other LLM system
-
-Copy the body of `distill.skill.md` into the system prompt or custom instructions.
-
-- Explicit: prefix with `distill this:`
-- Always-on: add `"Apply Distill to every request. Skip if the user writes --raw."` to the system prompt.
-
----
-
-## How Distill works
+## How it works
 
 Before solving, Distill evaluates the request and picks one of five modes automatically:
 
@@ -149,8 +113,6 @@ Before solving, Distill evaluates the request and picks one of five modes automa
 
 ### Task profiles
 
-Different task types get different treatment:
-
 - **Debugging** — observed vs expected behavior, root cause, minimal fix, verification step
 - **Code implementation** — feature goal, affected areas, edge cases, acceptance criteria
 - **Refactor** — behavior preservation, boundaries, risk areas, diff focus
@@ -161,11 +123,9 @@ Different task types get different treatment:
 
 ### Restraint rules
 
-Distill is explicitly designed not to pad:
-
 - No fake expertise, fake citations, or invented context
-- No framework unless the task needs it
 - No clarifying questions unless missing information actually changes the result
+- No framework added unless the task needs it
 - No rewriting the user's actual deliverable unless asked
 - Pass-through when the request is already good
 
@@ -173,25 +133,20 @@ Distill is explicitly designed not to pad:
 
 ## Examples
 
-### Compress noisy logs
-
+**Compress noisy logs**
 ```
 /distill help me debug this
 <paste 200 lines of terminal output>
 ```
-
 Extracts the primary error, relevant file/version details, and likely cause — then solves from there.
 
-### Architecture decisions
-
+**Architecture decision**
 ```
 /distill migrate Firestore to Postgres
 ```
-
 Identifies missing constraints, proposes a phased plan, flags what should stay vs move.
 
-### See what Distill produced
-
+**Inspect what Distill produced**
 ```
 /distill explain docker to me
 > what did you distill this into?
@@ -203,8 +158,9 @@ Identifies missing constraints, proposes a phased plan, flags what should stay v
 
 | File | Purpose |
 |---|---|
-| `distill.skill.md` | The skill — install as `~/.claude/skills/distill/SKILL.md` |
-| `distill-test-plan.md` | Before/after methodology to verify Distill improves real tasks |
+| `distill.skill.md` | The skill — installed as `~/.claude/skills/distill/SKILL.md` |
+| `install.sh` | One-line installer for Claude Code |
+| `distill-test-plan.md` | Before/after methodology to measure Distill's impact |
 
 ---
 
