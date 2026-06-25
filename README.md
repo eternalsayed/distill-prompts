@@ -152,6 +152,45 @@ Before solving, Distill evaluates the request and picks one of five modes automa
 
 ---
 
+## Benchmark
+
+Local prompt-readiness benchmark, 2026-06-25.
+
+Method: 10 realistic requests from `distill-test-plan.md` were scored twice: once as the raw user request, once after applying Distill. Each case used the same 8-metric scorecard: intent preservation, focus, correctness, context use, efficiency, verification, safety, and output usefulness. Maximum score is 40 per case.
+
+| Test case | Raw | Distill | Lift |
+|---|---:|---:|---:|
+| Simple pass-through | 37 | 38 | +3% |
+| Vague debugging request | 18 | 35 | +94% |
+| Noisy terminal logs | 20 | 36 | +80% |
+| Vague feature request | 19 | 34 | +79% |
+| Refactor safety request | 21 | 35 | +67% |
+| Architecture decision | 22 | 36 | +64% |
+| Writing task | 24 | 34 | +42% |
+| High-impact financial question | 18 | 37 | +106% |
+| Already-clear coding request | 38 | 38 | 0% |
+| Vague failing-tests request | 20 | 35 | +75% |
+
+Summary:
+
+| Metric | Raw | Distill |
+|---|---:|---:|
+| Total score | 237/400 | 358/400 |
+| Average per task | 23.7/40 | 35.8/40 |
+| Average quality | 59% | 90% |
+| Overall lift | - | +51% |
+
+Where Distill helped most:
+
+- Ambiguous coding work: turned "fix this bug" and "fix failing tests" into inspect-first, minimal-fix, verify-after workflows.
+- High-risk advice: avoided overconfident answers and added constraint/safety handling.
+- Noisy inputs: extracted the actionable signal instead of reacting to the whole paste.
+- Clear prompts: passed through without meaningful expansion.
+
+Limit: this benchmark measures prompt/request quality before execution, not independent downstream model success. Use `distill-test-plan.md` to reproduce the benchmark across multiple agents and real coding tasks.
+
+---
+
 ## Examples
 
 **Compress noisy logs**
