@@ -1,0 +1,12 @@
+{
+  "name": "distill",
+  "version": "1.0.0",
+  "description": "Converts vague, messy, or under-specified requests into clearer, efficient AI-ready instructions while preserving user intent. Use before solving complex, ambiguous, or high-risk tasks.",
+  "author": {
+    "name": "thatsuperdev"
+  },
+  "homepage": "https://github.com/thatsuperdev/distill-prompts",
+  "repository": "https://github.com/thatsuperdev/distill-prompts",
+  "license": "MIT",
+  "keywords": ["distill", "prompt", "clarity", "instructions", "ai", "skill"]
+}
